@@ -1,69 +1,89 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WhatsApp - Login</title>
+    <title>VibeChat - Privat Messenger</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-[#d1d7db] h-screen flex items-center justify-center">
-    <div class="bg-white w-full max-w-md p-8 rounded-lg shadow-2xl">
+<body class="bg-[#f0f2f5] h-screen flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md p-8 rounded-2xl shadow-xl border border-gray-100">
+        
+        <!-- Brand & Logo (Emoji agar aman) -->
         <div class="text-center mb-8">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="w-16 mx-auto mb-4">
-            <h1 class="text-2xl font-bold text-gray-700">WhatsApp Web</h1>
+            <div class="inline-block bg-emerald-500 text-white p-4 rounded-2xl shadow-lg mb-4">
+                <span class="text-4xl">💬</span>
+            </div>
+            <h1 class="text-2xl font-black text-gray-800 tracking-tight">VibeChat</h1>
+            <p class="text-sm text-gray-400">Private Personal Messaging System</p>
         </div>
 
         <!-- Tab Menu -->
-        <div class="flex border-b mb-6">
-            <button onclick="switchTab('login')" id="btnLogin" class="flex-1 py-2 font-bold border-b-2 border-[#00a884] text-[#00a884]">LOGIN</button>
-            <button onclick="switchTab('daftar')" id="btnDaftar" class="flex-1 py-2 font-bold text-gray-500">DAFTAR</button>
+        <div class="flex bg-gray-100 p-1 rounded-xl mb-6">
+            <button onclick="switchTab('login')" id="btnLogin" class="flex-1 py-2 font-bold rounded-lg bg-white shadow text-emerald-600 transition-all">MASUK</button>
+            <button onclick="switchTab('daftar')" id="btnDaftar" class="flex-1 py-2 font-bold rounded-lg text-gray-500 transition-all">DAFTAR</button>
         </div>
 
         <!-- Form Login -->
         <div id="formLogin">
-            <p class="text-sm text-gray-500 mb-4">Masukkan nomor WhatsApp Anda (+88...)</p>
-            <input type="text" id="lPhone" placeholder="+88..." class="w-full p-3 border rounded-lg mb-4 outline-[#00a884]">
-            <button onclick="login()" class="w-full bg-[#00a884] text-white py-3 rounded-lg font-bold shadow-md hover:bg-[#008f72]">MASUK</button>
+            <label class="block text-xs font-bold text-gray-500 mb-2">NOMOR AKUN (+88)</label>
+            <input type="text" id="lPhone" placeholder="+8800000000" class="w-full p-3 border border-gray-200 rounded-xl mb-4 focus:outline-none focus:border-emerald-500 font-mono text-lg tracking-widest">
+            <button onclick="login()" class="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-emerald-700 active:scale-95 transition-all">MASUK SEKARANG</button>
         </div>
 
         <!-- Form Daftar -->
         <div id="formDaftar" class="hidden">
-            <p class="text-sm text-gray-500 mb-4">Masukkan nama untuk mendaftar. Nomor akan dibuat otomatis.</p>
-            <input type="text" id="regName" placeholder="Nama Lengkap" class="w-full p-3 border rounded-lg mb-4 outline-[#00a884]">
-            <button onclick="daftar()" class="w-full bg-[#00a884] text-white py-3 rounded-lg font-bold shadow-md hover:bg-[#008f72]">DAFTAR SEKARANG</button>
+            <label class="block text-xs font-bold text-gray-500 mb-2">NAMA LENGKAP</label>
+            <input type="text" id="regName" placeholder="Masukkan nama Anda..." class="w-full p-3 border border-gray-200 rounded-xl mb-4 focus:outline-none focus:border-emerald-500">
+            <p class="text-[10px] text-gray-400 mb-4">* Nomor akun (+88) akan dibuatkan secara otomatis oleh sistem setelah Anda mendaftar.</p>
+            <button onclick="daftar()" class="w-full bg-slate-800 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-slate-900 active:scale-95 transition-all">BUAT AKUN</button>
+        </div>
+
+        <!-- Disclaimer (Sangat Penting untuk Hindari Deteksi Phishing) -->
+        <div class="mt-8 pt-6 border-t border-gray-100 text-center">
+            <p class="text-[9px] text-gray-300 uppercase tracking-widest leading-relaxed">
+                This is a private hobby project for educational purposes. <br>
+                We are not affiliated with any official messaging brands.
+            </p>
         </div>
     </div>
 
     <script>
         function switchTab(type) {
+            const btnL = document.getElementById('btnLogin');
+            const btnD = document.getElementById('btnDaftar');
+            const formL = document.getElementById('formLogin');
+            const formD = document.getElementById('formDaftar');
+
             if(type === 'login') {
-                document.getElementById('formLogin').classList.remove('hidden');
-                document.getElementById('formDaftar').classList.add('hidden');
-                document.getElementById('btnLogin').classList.add('border-[#00a884]', 'text-[#00a884]');
-                document.getElementById('btnDaftar').classList.remove('border-[#00a884]', 'text-[#00a884]');
+                formL.classList.remove('hidden');
+                formD.classList.add('hidden');
+                btnL.classList.add('bg-white', 'shadow', 'text-emerald-600');
+                btnD.classList.remove('bg-white', 'shadow', 'text-emerald-600');
             } else {
-                document.getElementById('formLogin').classList.add('hidden');
-                document.getElementById('formDaftar').classList.remove('hidden');
-                document.getElementById('btnDaftar').classList.add('border-[#00a884]', 'text-[#00a884]');
-                document.getElementById('btnLogin').classList.remove('border-[#00a884]', 'text-[#00a884]');
+                formL.classList.add('hidden');
+                formD.classList.remove('hidden');
+                btnD.classList.add('bg-white', 'shadow', 'text-emerald-600');
+                btnL.classList.remove('bg-white', 'shadow', 'text-emerald-600');
             }
         }
 
         async function daftar() {
             const name = document.getElementById('regName').value;
-            if(!name) return alert("Isi nama dulu");
+            if(!name) return alert("Isi nama dulu!");
             const res = await fetch('/register', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({name})
             });
             const data = await res.json();
-            alert("Berhasil! Nomor Anda: " + data.phone);
+            alert("Berhasil! Nomor akun Anda adalah: " + data.phone + "\nSimpan nomor ini untuk login kembali.");
             window.location.href = '/home';
         }
 
         async function login() {
             const phone = document.getElementById('lPhone').value;
+            if(!phone) return alert("Masukkan nomor akun!");
             const res = await fetch('/login', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -71,7 +91,7 @@
             });
             const data = await res.json();
             if(data.success) window.location.href = '/home';
-            else alert("Nomor tidak terdaftar!");
+            else alert("Nomor akun tidak terdaftar!");
         }
     </script>
 </body>
