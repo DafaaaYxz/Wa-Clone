@@ -1,0 +1,60 @@
+<div class="chat-container">
+  <div class="header">
+    <a href="/home"><-</a>
+    <b><%= targetUser.name %></b> 
+    <small>(<%= status %>)</small>
+  </div>
+  
+  <div id="messages" class="h-80 overflow-y-auto p-3 bg-gray-100">
+    <% messages.forEach(msg => { 
+      let m = JSON.parse(msg); %>
+      <div class="<%= m.sender == myPhone ? 'text-right' : 'text-left' %>">
+        <div class="inline-block p-2 m-1 rounded bg-white">
+          <% if(m.photo) { %> <img src="<%= m.photo %>" class="w-40"> <% } %>
+          <p><%= m.text %></p>
+          <small class="text-xs text-gray-400"><%= m.time %></small>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+
+  <div class="footer p-2">
+    <input type="text" id="textMsg" placeholder="Ketik pesan...">
+    <input type="file" id="photoFile" accept="image/*">
+    <button onclick="send()">Kirim</button>
+  </div>
+</div>
+
+<script>
+async function send() {
+  const text = document.getElementById('textMsg').value;
+  const file = document.getElementById('photoFile').files[0];
+  let photoData = null;
+
+  if(file) {
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      photoData = reader.result;
+      await postMessage(text, photoData);
+    };
+    reader.readAsDataURL(file);
+  } else {
+    await postMessage(text, null);
+  }
+}
+
+async function postMessage(text, photoData) {
+  await fetch('/send-message', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ 
+      targetPhone: '<%= targetUser.phone %>', 
+      text, 
+      photoData 
+    })
+  });
+  location.reload(); // Refresh untuk melihat pesan baru (karena Vercel tidak mendukung Socket.io)
+}
+// Auto refresh status/pesan tiap 5 detik
+setInterval(() => { location.reload(); }, 5000);
+</script>
