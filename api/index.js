@@ -4,156 +4,205 @@ const { Redis } = require('@upstash/redis');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
-const multer = require('multer');
 
 const app = express();
-const upload = multer({ limits: { fileSize: 5 * 1024 * 1024 } }); // Limit 5MB
 
-// --- KONFIGURASI UPSTASH (MASUKKAN DATA ANDA DI SINI) ---
+// --- KONFIGURASI UPSTASH (WAJIB ISI AGAR WORK) ---
 const redis = new Redis({
-  url: 'https://growing-firefly-50232.upstash.io',
-  token: 'AcQ4AAIncDFlYjI2ZWM2ODhmOGQ0N2YwOTI1Njg5ZDA3ZjRjMDdhMHAxNTAyMzI',
+  url: 'MASUKKAN_URL_UPSTASH_DI_SINI',
+  token: 'MASUKKAN_TOKEN_UPSTASH_DI_SINI',
 });
 
+// Setting View Engine EJS
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../views'));
 app.use(express.static(path.join(__dirname, '../public')));
-app.use(bodyParser.urlencoded({ extended: true }));
+
+// Middleware
+app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(cookieParser());
 
-// Middleware cek login
+// Middleware: Cek Login & Update Status Online
 const auth = async (req, res, next) => {
-  const phone = req.cookies.userPhone;
-  if (!phone) return res.redirect('/');
-  req.userPhone = phone;
-  // Update status online
-  await redis.set(`status:${phone}`, 'online', { ex: 60 }); 
-  next();
+    const phone = req.cookies.userPhone;
+    if (!phone) {
+        if (req.path === '/' || req.path === '/login' || req.path === '/register') {
+            return next();
+        }
+        return res.redirect('/');
+    }
+    
+    // Simpan status online selama 60 detik (auto offline jika tidak ada aktivitas)
+    await redis.set(`status:${phone}`, 'online', { ex: 60 });
+    req.userPhone = phone;
+    next();
 };
 
 // --- ROUTES ---
 
-// Halaman Awal (Login/Daftar)
+// 1. Halaman Login/Daftar
 app.get('/', (req, res) => {
-  res.render('auth');
+    if (req.cookies.userPhone) return res.redirect('/home');
+    res.render('auth');
 });
 
-// Proses Daftar
+// 2. Proses Daftar (Auto Nomor +88)
 app.post('/register', async (req, res) => {
-  const { name } = req.body;
-  // Generate nomor otomatis +88 + 8 digit acak
-  let phone;
-  let isUnique = false;
-  while (!isUnique) {
-    const randomDigits = Math.floor(10000000 + Math.random() * 90000000);
-    phone = `+88${randomDigits}`;
-    const exists = await redis.get(`user:${phone}`);
-    if (!exists) isUnique = true;
-  }
+    const { name } = req.body;
+    if (!name) return res.json({ success: false, message: "Nama wajib diisi" });
 
-  const userData = { phone, name, bio: "Hey there! I am using WhatsApp", photo: "https://cdn-icons-png.flaticon.com/512/149/149071.png" };
-  await redis.set(`user:${phone}`, JSON.stringify(userData));
-  await redis.sadd('all_users', phone);
+    let phone;
+    let isUnique = false;
 
-  res.cookie('userPhone', phone);
-  res.json({ success: true, phone });
-});
-
-// Proses Login
-app.post('/login', async (req, res) => {
-  const { phone } = req.body;
-  const user = await redis.get(`user:${phone}`);
-  if (user) {
-    res.cookie('userPhone', phone);
-    res.json({ success: true });
-  } else {
-    res.json({ success: false, message: "Nomor tidak terdaftar" });
-  }
-});
-
-// Beranda (List Chat)
-app.get('/home', auth, async (req, res) => {
-  const myPhone = req.userPhone;
-  const me = await redis.get(`user:${myPhone}`);
-  // Ambil history chat (disederhanakan)
-  const contacts = await redis.smembers(`contacts:${myPhone}`) || [];
-  let chatList = [];
-  for (let cPhone of contacts) {
-    const cData = await redis.get(`user:${cPhone}`);
-    if(cData) chatList.push(cData);
-  }
-  res.render('home', { me, chatList });
-});
-
-// Kontak Global & Search
-app.get('/contacts', auth, async (req, res) => {
-  const allPhones = await redis.smembers('all_users');
-  let users = [];
-  for (let p of allPhones) {
-    if (p !== req.userPhone) {
-      const u = await redis.get(`user:${p}`);
-      users.push(u);
+    // Loop untuk memastikan nomor tidak duplikat di database
+    while (!isUnique) {
+        const randomDigits = Math.floor(10000000 + Math.random() * 90000000); // 8 digit
+        phone = `+88${randomDigits}`;
+        const exists = await redis.get(`user:${phone}`);
+        if (!exists) isUnique = true;
     }
-  }
-  res.render('contacts', { users });
+
+    const userData = { 
+        phone, 
+        name, 
+        bio: "Hey there! I am using WhatsApp", 
+        photo: "https://cdn-icons-png.flaticon.com/512/149/149071.png" 
+    };
+
+    await redis.set(`user:${phone}`, JSON.stringify(userData));
+    await redis.sadd('all_users', phone); // Masuk ke list kontak global
+
+    res.cookie('userPhone', phone, { maxAge: 30 * 24 * 60 * 60 * 1000 }); // Login 30 hari
+    res.json({ success: true, phone });
 });
 
-// Simpan Kontak
-app.post('/add-contact', auth, async (req, res) => {
-  const { targetPhone } = req.body;
-  await redis.sadd(`contacts:${req.userPhone}`, targetPhone);
-  res.json({ success: true });
+// 3. Proses Login
+app.post('/login', async (req, res) => {
+    const { phone } = req.body;
+    const user = await redis.get(`user:${phone}`);
+    if (user) {
+        res.cookie('userPhone', phone, { maxAge: 30 * 24 * 60 * 60 * 1000 });
+        res.json({ success: true });
+    } else {
+        res.json({ success: false, message: "Nomor tidak ditemukan!" });
+    }
 });
 
-// Chat Privat
+// 4. Beranda (List Riwayat Chat Terupdate)
+app.get('/home', auth, async (req, res) => {
+    const myPhone = req.userPhone;
+    const me = await redis.get(`user:${myPhone}`);
+
+    // Ambil daftar nomor yang pernah chat dengan saya (Urut berdasarkan waktu terbaru)
+    const contactPhones = await redis.zrange(`chat_list:${myPhone}`, 0, -1, { rev: true }) || [];
+    
+    let chatList = [];
+    for (let cPhone of contactPhones) {
+        const cData = await redis.get(`user:${cPhone}`);
+        if (cData) {
+            // Ambil pesan terakhir untuk ditampilkan di bawah nama
+            const chatId = [myPhone, cPhone].sort().join('_');
+            const lastMsgRaw = await redis.lindex(`chats:${chatId}`, 0);
+            if (lastMsgRaw) {
+                const parsed = JSON.parse(lastMsgRaw);
+                cData.lastMsg = parsed.photo ? "📷 Foto" : parsed.text;
+                cData.lastTime = parsed.time;
+            } else {
+                cData.lastMsg = "Belum ada pesan";
+                cData.lastTime = "";
+            }
+            chatList.push(cData);
+        }
+    }
+
+    res.render('home', { me, chatList });
+});
+
+// 5. Chat Privat (Halaman Pesan)
 app.get('/chat/:targetPhone', auth, async (req, res) => {
-  const myPhone = req.userPhone;
-  const targetPhone = req.params.targetPhone;
-  const targetUser = await redis.get(`user:${targetPhone}`);
-  const status = await redis.get(`status:${targetPhone}`) || 'offline';
-  
-  // Ambil chat log
-  const chatId = [myPhone, targetPhone].sort().join('_');
-  const messages = await redis.lrange(`chats:${chatId}`, 0, -1) || [];
+    const myPhone = req.userPhone;
+    const targetPhone = req.params.targetPhone;
+    
+    const targetUser = await redis.get(`user:${targetPhone}`);
+    if (!targetUser) return res.redirect('/home');
 
-  res.render('chat', { targetUser, messages: messages.reverse(), myPhone, status });
+    const status = await redis.get(`status:${targetPhone}`) || 'offline';
+    
+    // Ambil history chat
+    const chatId = [myPhone, targetPhone].sort().join('_');
+    const messages = await redis.lrange(`chats:${chatId}`, 0, -1) || [];
+
+    res.render('chat', { targetUser, messages, myPhone, status });
 });
 
-// Kirim Pesan
-app.post('/send-message', auth, upload.single('photo'), async (req, res) => {
-  const { targetPhone, text } = req.body;
-  const myPhone = req.userPhone;
-  const chatId = [myPhone, targetPhone].sort().join('_');
+// 6. Proses Kirim Pesan (Teks & Foto)
+app.post('/send-message', auth, async (req, res) => {
+    const { targetPhone, text, photoData } = req.body;
+    const myPhone = req.userPhone;
+    const chatId = [myPhone, targetPhone].sort().join('_');
+    const timestamp = Date.now();
 
-  const newMessage = {
-    sender: myPhone,
-    text: text || "",
-    photo: req.body.photoData || null, // Base64 handling
-    time: new Date().toLocaleTimeString()
-  };
+    const newMessage = {
+        sender: myPhone,
+        text: text || "",
+        photo: photoData || null,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
 
-  await redis.lpush(`chats:${chatId}`, JSON.stringify(newMessage));
-  await redis.sadd(`contacts:${myPhone}`, targetPhone); // Auto save to history
-  await redis.sadd(`contacts:${targetPhone}`, myPhone);
-  
-  res.json({ success: true });
+    // Simpan pesan ke daftar chat
+    await redis.lpush(`chats:${chatId}`, JSON.stringify(newMessage));
+    
+    // Update urutan di halaman beranda (ZADD agar yang terbaru naik ke atas)
+    await redis.zadd(`chat_list:${myPhone}`, { score: timestamp, member: targetPhone });
+    await redis.zadd(`chat_list:${targetPhone}`, { score: timestamp, member: myPhone });
+    
+    res.json({ success: true });
 });
 
-// Profile Saya & Orang Lain
+// 7. Kontak Global & Fitur Cari
+app.get('/contacts', auth, async (req, res) => {
+    const allPhones = await redis.smembers('all_users');
+    let users = [];
+    for (let p of allPhones) {
+        if (p !== req.userPhone) {
+            const u = await redis.get(`user:${p}`);
+            if(u) users.push(u);
+        }
+    }
+    res.render('contacts', { users });
+});
+
+// Tambah Kontak manual ke history
+app.post('/add-contact', auth, async (req, res) => {
+    const { targetPhone } = req.body;
+    const timestamp = Date.now();
+    await redis.zadd(`chat_list:${req.userPhone}`, { score: timestamp, member: targetPhone });
+    res.json({ success: true });
+});
+
+// 8. Halaman Profil
 app.get('/profile/:phone', auth, async (req, res) => {
-  const targetPhone = req.params.phone;
-  const user = await redis.get(`user:${targetPhone}`);
-  const isMe = (targetPhone === req.userPhone);
-  res.render('profile', { user, isMe });
+    const targetPhone = req.params.phone;
+    const user = await redis.get(`user:${targetPhone}`);
+    if (!user) return res.redirect('/home');
+
+    const isMe = (targetPhone === req.userPhone);
+    res.render('profile', { user, isMe });
 });
 
-// Update Profile
+// 9. Update Profil Sendiri
 app.post('/profile/update', auth, async (req, res) => {
-  const { name, bio, photo } = req.body;
-  const userData = { phone: req.userPhone, name, bio, photo };
-  await redis.set(`user:${req.userPhone}`, JSON.stringify(userData));
-  res.json({ success: true });
+    const { name, bio, photo } = req.body;
+    const updatedData = { 
+        phone: req.userPhone, 
+        name, 
+        bio, 
+        photo: photo || "https://cdn-icons-png.flaticon.com/512/149/149071.png" 
+    };
+    await redis.set(`user:${req.userPhone}`, JSON.stringify(updatedData));
+    res.json({ success: true });
 });
 
+// Export untuk Vercel
 module.exports = app;
