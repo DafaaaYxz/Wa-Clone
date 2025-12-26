@@ -9,8 +9,8 @@ const app = express();
 
 // --- KONFIGURASI UPSTASH (WAJIB ISI AGAR WORK) ---
 const redis = new Redis({
-  url: 'MASUKKAN_URL_UPSTASH_DI_SINI',
-  token: 'MASUKKAN_TOKEN_UPSTASH_DI_SINI',
+  url: 'https://growing-firefly-50232.upstash.io',
+  token: 'AcQ4AAIncDFlYjI2ZWM2ODhmOGQ0N2YwOTI1Njg5ZDA3ZjRjMDdhMHAxNTAyMzI',
 });
 
 // Setting View Engine EJS
