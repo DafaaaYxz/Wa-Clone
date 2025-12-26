@@ -1,17 +1,129 @@
-<!-- Bagian di dalam loop chatList di home.ejs -->
-<% chatList.forEach(chat => { %>
-    <a href="/chat/<%= chat.phone %>" class="flex items-center p-4 border-b hover:bg-gray-50 transition">
-        <div class="relative">
-            <img src="<%= chat.photo %>" class="w-14 h-14 rounded-full object-cover mr-4">
-        </div>
-        <div class="flex-1 border-b pb-2">
-            <div class="flex justify-between items-center">
-                <h2 class="font-bold text-gray-800 text-lg"><%= chat.name %></h2>
-                <span class="text-xs text-green-500 font-bold">Baru saja</span>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Clone - Beranda</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom scrollbar ala WhatsApp */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #ced0d1; border-radius: 10px; }
+        .active-tab { border-bottom: 3px solid white; }
+    </style>
+</head>
+<body class="bg-[#d1d7db] h-screen overflow-hidden">
+
+    <div class="max-w-md mx-auto bg-white h-screen shadow-2xl flex flex-col relative">
+        
+        <!-- HEADER ATAS (WARNA HIJAU WA) -->
+        <div class="bg-[#075E54] text-white pt-4 pb-2 px-4 shadow-md sticky top-0 z-10">
+            <div class="flex justify-between items-center mb-4">
+                <h1 class="text-xl font-semibold">WhatsApp</h1>
+                <div class="flex gap-5 items-center">
+                    <a href="/contacts" class="text-xl">🔍</a>
+                    <!-- Klik foto profil untuk ke halaman profil saya -->
+                    <a href="/profile/<%= me.phone %>">
+                        <img src="<%= me.photo %>" class="w-8 h-8 rounded-full border border-gray-300 object-cover">
+                    </a>
+                </div>
             </div>
-            <p class="text-sm text-gray-500 truncate w-60">
-                <%= chat.lastMsg %>
-            </p>
+            
+            <!-- Tab Menu (Variasi Visual) -->
+            <div class="flex justify-around text-sm font-bold opacity-90 uppercase tracking-wide">
+                <div class="pb-2 border-b-4 border-white flex-1 text-center">Chat</div>
+                <div class="pb-2 flex-1 text-center opacity-60">Status</div>
+                <div class="pb-2 flex-1 text-center opacity-60">Panggilan</div>
+            </div>
         </div>
-    </a>
-<% }) %>
+
+        <!-- SEARCH BAR (Untuk memfilter chat yang sudah ada) -->
+        <div class="p-2 bg-white border-b">
+            <div class="relative">
+                <input type="text" id="chatSearch" onkeyup="filterChats()" 
+                    placeholder="Cari chat atau pesan..." 
+                    class="w-full bg-gray-100 py-2 px-4 pl-10 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-[#00a884]">
+                <span class="absolute left-3 top-2 text-gray-400">🔍</span>
+            </div>
+        </div>
+
+        <!-- DAFTAR CHAT (History) -->
+        <div id="chatContainer" class="flex-1 overflow-y-auto bg-white">
+            <% if (chatList.length === 0) { %>
+                <!-- Tampilan jika belum pernah chat sama sekali -->
+                <div class="flex flex-col items-center justify-center h-full text-center p-10">
+                    <div class="bg-gray-100 p-6 rounded-full mb-4">
+                        <span class="text-4xl">💬</span>
+                    </div>
+                    <p class="text-gray-500 font-medium">Belum ada chat.</p>
+                    <p class="text-xs text-gray-400 mt-1">Mulai kirim pesan ke kontak Anda!</p>
+                    <a href="/contacts" class="mt-4 bg-[#25D366] text-white px-6 py-2 rounded-full font-bold shadow-md hover:bg-[#1ebd5e]">
+                        MULAI CHAT
+                    </a>
+                </div>
+            <% } else { %>
+                <!-- Looping Riwayat Chat -->
+                <% chatList.forEach(chat => { %>
+                    <a href="/chat/<%= chat.phone %>" class="chat-item flex items-center p-4 hover:bg-gray-50 border-b border-gray-100 transition duration-150">
+                        <!-- Foto Profil -->
+                        <div class="relative flex-shrink-0">
+                            <img src="<%= chat.photo %>" class="w-14 h-14 rounded-full object-cover">
+                        </div>
+                        
+                        <!-- Isi Chat Preview -->
+                        <div class="ml-4 flex-1 overflow-hidden">
+                            <div class="flex justify-between items-baseline">
+                                <h2 class="font-bold text-gray-800 truncate name-tag"><%= chat.name %></h2>
+                                <span class="text-[10px] text-gray-400 font-medium whitespace-nowrap"><%= chat.lastTime %></span>
+                            </div>
+                            <div class="flex justify-between items-center mt-1">
+                                <p class="text-sm text-gray-500 truncate pr-5 message-preview">
+                                    <%= chat.lastMsg %>
+                                </p>
+                                <!-- Indikator nomor (kecil) -->
+                                <span class="text-[9px] bg-gray-200 px-1 rounded text-gray-500 font-mono"><%= chat.phone %></span>
+                            </div>
+                        </div>
+                    </a>
+                <% }) %>
+            <% } %>
+        </div>
+
+        <!-- FLOATING ACTION BUTTON (Tombol Tambah Chat) -->
+        <a href="/contacts" class="absolute bottom-6 right-6 bg-[#25D366] text-white w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transform active:scale-90 transition hover:bg-[#1ebd5e] z-20">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            </svg>
+        </a>
+
+    </div>
+
+    <script>
+        // Fitur Filter Chat di Beranda
+        function filterChats() {
+            const input = document.getElementById('chatSearch').value.toLowerCase();
+            const chats = document.getElementsByClassName('chat-item');
+
+            for (let chat of chats) {
+                const name = chat.querySelector('.name-tag').innerText.toLowerCase();
+                const lastMsg = chat.querySelector('.message-preview').innerText.toLowerCase();
+                
+                if (name.includes(input) || lastMsg.includes(input)) {
+                    chat.style.display = "flex";
+                } else {
+                    chat.style.display = "none";
+                }
+            }
+        }
+
+        // Auto Refresh halaman setiap 15 detik untuk update preview pesan baru di home
+        // (Sangat berguna jika orang lain mengirim pesan ke kita)
+        setInterval(() => {
+            // Kita bisa menggunakan fetch untuk cek data baru tanpa reload, 
+            // tapi reload adalah cara paling stabil untuk Vercel + Redis.
+            window.location.reload();
+        }, 15000);
+    </script>
+</body>
+</html>
