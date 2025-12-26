@@ -1,37 +1,78 @@
-<div class="p-5">
-  <h2>WhatsApp Clone</h2>
-  <div id="regForm">
-    <input type="text" id="name" placeholder="Nama Anda" class="border p-2">
-    <button onclick="daftar()" class="bg-green-500 text-white p-2">Daftar (Auto Nomor)</button>
-  </div>
-  <hr class="my-5">
-  <input type="text" id="lPhone" placeholder="+88..." class="border p-2">
-  <button onclick="login()" class="bg-blue-500 text-white p-2">Login</button>
-</div>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#d1d7db] h-screen flex items-center justify-center">
+    <div class="bg-white w-full max-w-md p-8 rounded-lg shadow-2xl">
+        <div class="text-center mb-8">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="w-16 mx-auto mb-4">
+            <h1 class="text-2xl font-bold text-gray-700">WhatsApp Web</h1>
+        </div>
 
-<script>
-async function daftar() {
-  const name = document.getElementById('name').value;
-  const res = await fetch('/register', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({name})
-  });
-  const data = await res.json();
-  if(data.success) {
-    alert("Nomor Anda: " + data.phone);
-    window.location.href = '/home';
-  }
-}
-async function login() {
-  const phone = document.getElementById('lPhone').value;
-  const res = await fetch('/login', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({phone})
-  });
-  const data = await res.json();
-  if(data.success) window.location.href = '/home';
-  else alert("Gagal login");
-}
-</script>
+        <!-- Tab Menu -->
+        <div class="flex border-b mb-6">
+            <button onclick="switchTab('login')" id="btnLogin" class="flex-1 py-2 font-bold border-b-2 border-[#00a884] text-[#00a884]">LOGIN</button>
+            <button onclick="switchTab('daftar')" id="btnDaftar" class="flex-1 py-2 font-bold text-gray-500">DAFTAR</button>
+        </div>
+
+        <!-- Form Login -->
+        <div id="formLogin">
+            <p class="text-sm text-gray-500 mb-4">Masukkan nomor WhatsApp Anda (+88...)</p>
+            <input type="text" id="lPhone" placeholder="+88..." class="w-full p-3 border rounded-lg mb-4 outline-[#00a884]">
+            <button onclick="login()" class="w-full bg-[#00a884] text-white py-3 rounded-lg font-bold shadow-md hover:bg-[#008f72]">MASUK</button>
+        </div>
+
+        <!-- Form Daftar -->
+        <div id="formDaftar" class="hidden">
+            <p class="text-sm text-gray-500 mb-4">Masukkan nama untuk mendaftar. Nomor akan dibuat otomatis.</p>
+            <input type="text" id="regName" placeholder="Nama Lengkap" class="w-full p-3 border rounded-lg mb-4 outline-[#00a884]">
+            <button onclick="daftar()" class="w-full bg-[#00a884] text-white py-3 rounded-lg font-bold shadow-md hover:bg-[#008f72]">DAFTAR SEKARANG</button>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(type) {
+            if(type === 'login') {
+                document.getElementById('formLogin').classList.remove('hidden');
+                document.getElementById('formDaftar').classList.add('hidden');
+                document.getElementById('btnLogin').classList.add('border-[#00a884]', 'text-[#00a884]');
+                document.getElementById('btnDaftar').classList.remove('border-[#00a884]', 'text-[#00a884]');
+            } else {
+                document.getElementById('formLogin').classList.add('hidden');
+                document.getElementById('formDaftar').classList.remove('hidden');
+                document.getElementById('btnDaftar').classList.add('border-[#00a884]', 'text-[#00a884]');
+                document.getElementById('btnLogin').classList.remove('border-[#00a884]', 'text-[#00a884]');
+            }
+        }
+
+        async function daftar() {
+            const name = document.getElementById('regName').value;
+            if(!name) return alert("Isi nama dulu");
+            const res = await fetch('/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({name})
+            });
+            const data = await res.json();
+            alert("Berhasil! Nomor Anda: " + data.phone);
+            window.location.href = '/home';
+        }
+
+        async function login() {
+            const phone = document.getElementById('lPhone').value;
+            const res = await fetch('/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({phone})
+            });
+            const data = await res.json();
+            if(data.success) window.location.href = '/home';
+            else alert("Nomor tidak terdaftar!");
+        }
+    </script>
+</body>
+</html>
