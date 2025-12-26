@@ -5,110 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VibeChat - Beranda</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-    </style>
 </head>
-<body class="bg-slate-100 h-screen overflow-hidden">
-
-    <div class="max-w-md mx-auto bg-white h-screen shadow-2xl flex flex-col relative border-x border-gray-200">
+<body class="bg-slate-50 h-screen flex flex-col items-center">
+    <div class="w-full max-w-md bg-white h-screen flex flex-col shadow-2xl relative">
         
         <!-- Header -->
-        <div class="bg-slate-800 text-white pt-6 pb-4 px-5 shadow-lg z-20">
+        <div class="bg-slate-900 text-white p-6 shadow-xl">
             <div class="flex justify-between items-center mb-6">
                 <div>
-                    <h1 class="text-xl font-black tracking-tight italic">VibeChat</h1>
-                    <p class="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">Secure Node System</p>
+                    <h1 class="text-2xl font-black italic text-emerald-500">VibeChat</h1>
+                    <p class="text-[9px] tracking-[0.2em] text-slate-400 font-bold">PRIVATE ENCRYPTED</p>
                 </div>
-                <div class="flex gap-4 items-center">
-                    <a href="/contacts" class="bg-slate-700 p-2 rounded-full hover:bg-slate-600 transition">🔍</a>
+                <div class="flex gap-4">
+                    <a href="/contacts" class="text-xl hover:scale-110 transition">🔍</a>
                     <a href="/profile/<%= me.phone %>">
-                        <img src="<%= me.photo %>" class="w-10 h-10 rounded-full border-2 border-emerald-500 object-cover p-0.5">
+                        <img src="<%= me.photo %>" class="w-10 h-10 rounded-full border-2 border-emerald-500 object-cover">
                     </a>
                 </div>
             </div>
-            
-            <div class="flex justify-around text-xs font-black uppercase tracking-tighter opacity-80">
-                <div class="pb-2 border-b-2 border-emerald-500 text-emerald-400 flex-1 text-center">Chat Aktif</div>
-                <div class="pb-2 flex-1 text-center hover:opacity-100 transition cursor-pointer">Kontak</div>
-                <div class="pb-2 flex-1 text-center hover:opacity-100 transition cursor-pointer">Arsip</div>
-            </div>
         </div>
 
-        <!-- Search Bar -->
-        <div class="p-3 bg-gray-50 border-b border-gray-100">
-            <div class="relative">
-                <input type="text" id="searchInp" onkeyup="filter()" placeholder="Cari percakapan..." 
-                    class="w-full bg-white py-2 px-10 rounded-full text-xs border border-gray-200 focus:outline-none focus:border-emerald-500">
-                <span class="absolute left-4 top-2 text-gray-400">🔍</span>
-            </div>
-        </div>
-
-        <!-- Daftar Riwayat Chat -->
-        <div id="chatList" class="flex-1 overflow-y-auto bg-white pb-24">
+        <!-- Chat List -->
+        <div class="flex-1 overflow-y-auto">
             <% if (chatList.length === 0) { %>
-                <div class="flex flex-col items-center justify-center h-full text-center p-10">
-                    <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                        <span class="text-3xl">☁️</span>
-                    </div>
-                    <h3 class="font-bold text-gray-700">Belum ada pesan</h3>
-                    <p class="text-xs text-gray-400 mt-1 leading-relaxed">Ketuk tombol di bawah untuk mulai mengobrol dengan pengguna lain.</p>
+                <div class="flex flex-col items-center justify-center h-full text-center p-10 grayscale opacity-50">
+                    <span class="text-6xl mb-4">💬</span>
+                    <p class="font-bold text-slate-600">Mulai chat pertama Anda!</p>
                 </div>
             <% } else { %>
                 <% chatList.forEach(chat => { %>
-                    <a href="/chat/<%= chat.phone %>" class="chat-item flex items-center p-4 hover:bg-slate-50 border-b border-gray-50 transition-all active:bg-gray-100">
-                        <div class="relative">
-                            <img src="<%= chat.photo %>" class="w-14 h-14 rounded-2xl object-cover shadow-sm">
-                            <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
-                        </div>
-                        
+                    <a href="/chat/<%= chat.phone %>" class="flex items-center p-4 border-b border-slate-50 hover:bg-slate-50 transition active:bg-slate-100">
+                        <img src="<%= chat.photo %>" class="w-14 h-14 rounded-2xl object-cover shadow-sm">
                         <div class="ml-4 flex-1 overflow-hidden">
-                            <div class="flex justify-between items-center mb-1">
-                                <h2 class="font-bold text-gray-800 truncate name-tag text-md"><%= chat.name %></h2>
-                                <span class="text-[10px] text-gray-400 font-mono"><%= chat.lastTime %></span>
-                            </div>
                             <div class="flex justify-between items-center">
-                                <p class="text-sm text-gray-500 truncate pr-4 message-preview">
-                                    <%= chat.lastMsg %>
-                                </p>
-                                <span class="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-bold tracking-tighter"><%= chat.phone %></span>
+                                <h2 class="font-bold text-slate-800 truncate"><%= chat.name %></h2>
+                                <span class="text-[10px] text-slate-400 font-mono"><%= chat.lastTime %></span>
                             </div>
+                            <p class="text-sm text-slate-500 truncate mt-0.5 italic">
+                                <%= chat.lastMsg %>
+                            </p>
                         </div>
                     </a>
                 <% }) %>
             <% } %>
         </div>
 
-        <!-- FAB (Floating Action Button) -->
-        <a href="/contacts" class="absolute bottom-8 right-6 bg-emerald-600 text-white w-14 h-14 rounded-2xl flex items-center justify-center shadow-xl hover:bg-emerald-700 active:scale-90 transition-all z-30">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
+        <!-- Floating Button -->
+        <a href="/contacts" class="absolute bottom-8 right-8 bg-emerald-600 text-white w-14 h-14 rounded-2xl flex items-center justify-center shadow-2xl hover:rotate-90 transition-all duration-300">
+            <span class="text-3xl font-light">+</span>
         </a>
-
     </div>
-
-    <script>
-        // Fungsi filter pencarian
-        function filter() {
-            let input = document.getElementById('searchInp').value.toLowerCase();
-            let items = document.getElementsByClassName('chat-item');
-            for (let item of items) {
-                let name = item.querySelector('.name-tag').innerText.toLowerCase();
-                let msg = item.querySelector('.message-preview').innerText.toLowerCase();
-                if(name.includes(input) || msg.includes(input)) {
-                    item.style.display = "flex";
-                } else {
-                    item.style.display = "none";
-                }
-            }
-        }
-
-        // Auto Refresh data tiap 20 detik
-        setInterval(() => {
-            window.location.reload();
-        }, 20000);
-    </script>
 </body>
 </html>
