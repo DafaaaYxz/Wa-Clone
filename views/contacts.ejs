@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kontak Global</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="max-w-md mx-auto bg-white min-h-screen shadow-lg flex flex-col">
+        <!-- Header -->
+        <div class="bg-[#075E54] p-4 text-white flex items-center gap-4">
+            <a href="/home" class="text-xl">←</a>
+            <div>
+                <h1 class="text-lg font-bold">Pilih Kontak</h1>
+                <p class="text-xs"><%= users.length %> Kontak</p>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="p-2 bg-gray-100">
+            <input type="text" id="search" placeholder="Cari nama atau nomor..." 
+                class="w-full p-2 rounded-lg border focus:outline-none" onkeyup="filterContacts()">
+        </div>
+
+        <!-- Contact List -->
+        <div id="contactList" class="flex-1 overflow-y-auto">
+            <% users.forEach(user => { %>
+                <div class="contact-item flex items-center p-4 border-b hover:bg-gray-50 cursor-pointer" 
+                     onclick="startChat('<%= user.phone %>')">
+                    <img src="<%= user.photo %>" class="w-10 h-10 rounded-full object-cover mr-4">
+                    <div>
+                        <h2 class="font-bold text-gray-800 name-tag"><%= user.name %></h2>
+                        <p class="text-xs text-gray-500 phone-tag"><%= user.phone %></p>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    </div>
+
+    <script>
+        function filterContacts() {
+            let input = document.getElementById('search').value.toLowerCase();
+            let items = document.getElementsByClassName('contact-item');
+            
+            for (let i = 0; i < items.length; i++) {
+                let name = items[i].querySelector('.name-tag').innerText.toLowerCase();
+                let phone = items[i].querySelector('.phone-tag').innerText.toLowerCase();
+                if (name.includes(input) || phone.includes(input)) {
+                    items[i].style.display = "";
+                } else {
+                    items[i].style.display = "none";
+                }
+            }
+        }
+
+        async function startChat(phone) {
+            // Tambahkan ke daftar kontak saya dulu
+            await fetch('/add-contact', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ targetPhone: phone })
+            });
+            window.location.href = '/chat/' + phone;
+        }
+    </script>
+</body>
+</html>
