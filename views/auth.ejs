@@ -3,49 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VibeChat - Privat Messenger</title>
+    <title>VibeChat - Secure Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-[#f0f2f5] h-screen flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-md p-8 rounded-2xl shadow-xl border border-gray-100">
+<body class="bg-slate-100 h-screen flex items-center justify-center p-4 font-sans">
+    <div class="bg-white w-full max-w-md p-8 rounded-3xl shadow-2xl border border-gray-100">
         
-        <!-- Brand & Logo (Emoji agar aman) -->
         <div class="text-center mb-8">
-            <div class="inline-block bg-emerald-500 text-white p-4 rounded-2xl shadow-lg mb-4">
-                <span class="text-4xl">💬</span>
+            <div class="inline-block bg-emerald-600 text-white p-4 rounded-2xl shadow-lg mb-4">
+                <span class="text-4xl">🛡️</span>
             </div>
-            <h1 class="text-2xl font-black text-gray-800 tracking-tight">VibeChat</h1>
-            <p class="text-sm text-gray-400">Private Personal Messaging System</p>
+            <h1 class="text-2xl font-black text-slate-800 italic">VibeChat</h1>
+            <p class="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Private Messenger System</p>
         </div>
 
-        <!-- Tab Menu -->
-        <div class="flex bg-gray-100 p-1 rounded-xl mb-6">
-            <button onclick="switchTab('login')" id="btnLogin" class="flex-1 py-2 font-bold rounded-lg bg-white shadow text-emerald-600 transition-all">MASUK</button>
-            <button onclick="switchTab('daftar')" id="btnDaftar" class="flex-1 py-2 font-bold rounded-lg text-gray-500 transition-all">DAFTAR</button>
+        <!-- Tab Selector -->
+        <div class="flex bg-slate-100 p-1 rounded-2xl mb-8" id="tabGroup">
+            <button onclick="switchTab('login')" id="btnLogin" class="flex-1 py-3 font-bold rounded-xl bg-white shadow text-emerald-600 transition-all">MASUK</button>
+            <button onclick="switchTab('daftar')" id="btnDaftar" class="flex-1 py-3 font-bold rounded-xl text-slate-500 transition-all">DAFTAR</button>
         </div>
 
         <!-- Form Login -->
         <div id="formLogin">
-            <label class="block text-xs font-bold text-gray-500 mb-2">NOMOR AKUN (+88)</label>
-            <input type="text" id="lPhone" placeholder="+8800000000" class="w-full p-3 border border-gray-200 rounded-xl mb-4 focus:outline-none focus:border-emerald-500 font-mono text-lg tracking-widest">
-            <button onclick="login()" class="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-emerald-700 active:scale-95 transition-all">MASUK SEKARANG</button>
+            <div class="mb-5">
+                <label class="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">Nomor Akun (+88)</label>
+                <input type="text" id="lPhone" placeholder="+88..." class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono text-lg tracking-wider">
+            </div>
+            
+            <!-- Hidden PIN Area (Muncul jika akun ada A2F) -->
+            <div id="pinArea" class="hidden mb-6 animate-bounce">
+                <label class="block text-[10px] font-black text-emerald-600 mb-2 uppercase tracking-widest">Verifikasi A2F (6 Digit PIN)</label>
+                <input type="password" id="lPin" maxlength="6" placeholder="••••••" class="w-full p-4 bg-emerald-50 border-2 border-emerald-400 rounded-2xl focus:outline-none text-center text-2xl tracking-[0.8em] font-bold text-emerald-700">
+            </div>
+
+            <button onclick="login()" id="btnLoginAction" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black shadow-xl hover:bg-black active:scale-95 transition-all tracking-widest">AKSES PESAN</button>
         </div>
 
         <!-- Form Daftar -->
         <div id="formDaftar" class="hidden">
-            <label class="block text-xs font-bold text-gray-500 mb-2">NAMA LENGKAP</label>
-            <input type="text" id="regName" placeholder="Masukkan nama Anda..." class="w-full p-3 border border-gray-200 rounded-xl mb-4 focus:outline-none focus:border-emerald-500">
-            <p class="text-[10px] text-gray-400 mb-4">* Nomor akun (+88) akan dibuatkan secara otomatis oleh sistem setelah Anda mendaftar.</p>
-            <button onclick="daftar()" class="w-full bg-slate-800 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-slate-900 active:scale-95 transition-all">BUAT AKUN</button>
+            <div class="mb-6">
+                <label class="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">Nama Lengkap</label>
+                <input type="text" id="regName" placeholder="Nama Anda" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <div class="bg-amber-50 p-4 rounded-2xl border border-amber-100 mb-6">
+                <p class="text-[10px] text-amber-700 leading-relaxed font-medium">Nomor akun <b>+88</b> akan diberikan secara otomatis. Pastikan Anda mencatat nomor tersebut setelah mendaftar.</p>
+            </div>
+            <button onclick="daftar()" class="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black shadow-xl hover:bg-emerald-700 active:scale-95 transition-all tracking-widest">BUAT AKUN BARU</button>
         </div>
 
-        <!-- Disclaimer (Sangat Penting untuk Hindari Deteksi Phishing) -->
-        <div class="mt-8 pt-6 border-t border-gray-100 text-center">
-            <p class="text-[9px] text-gray-300 uppercase tracking-widest leading-relaxed">
-                This is a private hobby project for educational purposes. <br>
-                We are not affiliated with any official messaging brands.
-            </p>
-        </div>
+        <p class="mt-8 text-[9px] text-slate-300 text-center leading-relaxed uppercase tracking-tighter">
+            Hobby Project. No affiliation with any official apps.<br>© 2025 VibeChat Private Server.
+        </p>
     </div>
 
     <script>
@@ -56,42 +64,50 @@
             const formD = document.getElementById('formDaftar');
 
             if(type === 'login') {
-                formL.classList.remove('hidden');
-                formD.classList.add('hidden');
-                btnL.classList.add('bg-white', 'shadow', 'text-emerald-600');
-                btnD.classList.remove('bg-white', 'shadow', 'text-emerald-600');
+                formL.classList.remove('hidden'); formD.classList.add('hidden');
+                btnL.classList.add('bg-white', 'shadow', 'text-emerald-600'); btnD.classList.remove('bg-white', 'shadow', 'text-emerald-600');
             } else {
-                formL.classList.add('hidden');
-                formD.classList.remove('hidden');
-                btnD.classList.add('bg-white', 'shadow', 'text-emerald-600');
-                btnL.classList.remove('bg-white', 'shadow', 'text-emerald-600');
+                formL.classList.add('hidden'); formD.classList.remove('hidden');
+                btnD.classList.add('bg-white', 'shadow', 'text-emerald-600'); btnL.classList.remove('bg-white', 'shadow', 'text-emerald-600');
             }
         }
 
         async function daftar() {
             const name = document.getElementById('regName').value;
-            if(!name) return alert("Isi nama dulu!");
+            if(!name) return alert("Nama tidak boleh kosong!");
             const res = await fetch('/register', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({name})
             });
             const data = await res.json();
-            alert("Berhasil! Nomor akun Anda adalah: " + data.phone + "\nSimpan nomor ini untuk login kembali.");
+            alert("PENDAFTARAN BERHASIL!\n\nNomor Anda: " + data.phone + "\nCatat nomor ini untuk masuk kembali.");
             window.location.href = '/home';
         }
 
         async function login() {
             const phone = document.getElementById('lPhone').value;
-            if(!phone) return alert("Masukkan nomor akun!");
+            const pin = document.getElementById('lPin').value;
+            
             const res = await fetch('/login', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({phone})
+                body: JSON.stringify({ phone, pin })
             });
             const data = await res.json();
-            if(data.success) window.location.href = '/home';
-            else alert("Nomor akun tidak terdaftar!");
+
+            if (data.success) {
+                window.location.href = '/home';
+            } else {
+                if (data.needsPin) {
+                    alert("Akun ini dilindungi PIN A2F!");
+                    document.getElementById('pinArea').classList.remove('hidden');
+                    document.getElementById('lPhone').readOnly = true;
+                    document.getElementById('btnLoginAction').innerText = "VERIFIKASI PIN";
+                } else {
+                    alert(data.message || "Gagal masuk. Cek kembali nomor Anda.");
+                }
+            }
         }
     </script>
 </body>
