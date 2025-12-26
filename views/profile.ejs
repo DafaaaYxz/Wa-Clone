@@ -3,92 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profil - <%= user.name %></title>
+    <title>VibeChat - Profil</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100">
-    <div class="max-w-md mx-auto bg-white min-h-screen shadow-lg">
+<body class="bg-slate-100 h-screen flex flex-col items-center">
+    <div class="w-full max-w-md bg-white h-screen flex flex-col shadow-2xl relative overflow-y-auto pb-10">
+        
         <!-- Header -->
-        <div class="bg-[#075E54] p-4 text-white flex items-center gap-4">
-            <a href="/home" class="text-xl">←</a>
-            <h1 class="text-lg font-bold">Profil</h1>
+        <div class="bg-slate-900 p-6 text-white flex items-center gap-4">
+            <a href="/home" class="text-emerald-400 font-bold">←</a>
+            <h1 class="font-black italic text-lg tracking-widest uppercase">Info Profil</h1>
         </div>
 
-        <div class="p-6 text-center">
-            <div class="relative inline-block">
-                <img id="profileImg" src="<%= user.photo %>" class="w-32 h-32 rounded-full object-cover border-4 border-gray-200">
-                <% if (isMe) { %>
-                    <label for="fileInput" class="absolute bottom-0 right-0 bg-[#25D366] p-2 rounded-full cursor-pointer shadow-lg">
+        <div class="p-8 text-center">
+            <div class="relative inline-block mb-6">
+                <img id="pImg" src="<%= user.photo %>" class="w-32 h-32 rounded-[2.5rem] object-cover border-4 border-emerald-500 shadow-xl">
+                <% if(isMe) { %>
+                    <label for="fInp" class="absolute -bottom-2 -right-2 bg-slate-900 text-white p-3 rounded-2xl cursor-pointer shadow-lg hover:scale-110 transition">
                         📷
-                        <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="previewImage(event)">
+                        <input type="file" id="fInp" class="hidden" accept="image/*" onchange="preview(event)">
                     </label>
                 <% } %>
             </div>
 
-            <div class="mt-6 text-left space-y-4">
+            <div class="space-y-6 text-left">
                 <div>
-                    <label class="text-xs text-gray-500">Nama</label>
-                    <input type="text" id="name" value="<%= user.name %>" 
-                        class="w-full border-b p-2 focus:outline-none focus:border-[#075E54]" 
-                        <%= isMe ? '' : 'disabled' %>>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Nama Tampilan</label>
+                    <input type="text" id="pName" value="<%= user.name %>" class="w-full border-b-2 border-slate-100 p-2 font-bold text-slate-800 focus:border-emerald-500 outline-none transition" <%= isMe ? '' : 'disabled' %>>
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Bio / Status</label>
+                    <input type="text" id="pBio" value="<%= user.bio %>" class="w-full border-b-2 border-slate-100 p-2 text-sm text-slate-600 focus:border-emerald-500 outline-none transition" <%= isMe ? '' : 'disabled' %>>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-2xl">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">ID Nomor Akun</label>
+                    <p class="font-mono font-bold text-emerald-600 tracking-wider"><%= user.phone %></p>
                 </div>
 
-                <div>
-                    <label class="text-xs text-gray-500">Info / Bio</label>
-                    <input type="text" id="bio" value="<%= user.bio %>" 
-                        class="w-full border-b p-2 focus:outline-none focus:border-[#075E54]" 
-                        <%= isMe ? '' : 'disabled' %>>
-                </div>
+                <% if(isMe) { %>
+                    <!-- A2F Setup -->
+                    <div class="bg-emerald-50 p-5 rounded-[2rem] border border-emerald-100 shadow-inner">
+                        <h3 class="text-xs font-black text-emerald-800 mb-2 uppercase tracking-wider">🛡️ Keamanan Lapis Dua (A2F)</h3>
+                        <p class="text-[9px] text-emerald-600 mb-4 leading-relaxed font-bold italic">PIN 6 digit akan diminta saat login agar akun Anda tidak dimasuki sembarang orang.</p>
+                        <div class="flex gap-2">
+                            <input type="password" id="newPin" maxlength="6" placeholder="Buat PIN" class="flex-1 p-3 bg-white border border-emerald-200 rounded-xl text-center font-bold tracking-[0.5em] focus:ring-2 focus:ring-emerald-500 outline-none shadow-sm">
+                            <button onclick="saveA2F()" class="bg-emerald-600 text-white px-5 rounded-xl font-bold text-[10px] shadow-lg active:scale-95 transition">AKTIFKAN</button>
+                        </div>
+                        <% if(user.pin) { %>
+                            <div class="mt-3 flex items-center gap-2">
+                                <span class="bg-emerald-200 text-emerald-700 text-[8px] px-2 py-1 rounded-full font-black">PIN AKTIF: <%= user.pin %></span>
+                            </div>
+                        <% } %>
+                    </div>
 
-                <div>
-                    <label class="text-xs text-gray-500">Nomor Telepon</label>
-                    <p class="p-2 text-gray-800 font-mono"><%= user.phone %></p>
-                </div>
+                    <button onclick="saveProfile()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black shadow-xl hover:bg-black transition mt-4 tracking-widest">SIMPAN PROFIL</button>
+                    <button onclick="logout()" class="w-full text-red-500 font-bold text-xs mt-4">LOGOUT DARI SISTEM</button>
+                <% } else { %>
+                    <a href="/chat/<%= user.phone %>" class="block text-center w-full bg-emerald-600 text-white py-4 rounded-2xl font-black shadow-xl tracking-widest">KIRIM PESAN</a>
+                <% } %>
             </div>
-
-            <% if (isMe) { %>
-                <button onclick="updateProfile()" class="mt-8 w-full bg-[#25D366] text-white font-bold py-3 rounded-lg shadow-md hover:bg-[#1ebd5e]">
-                    SIMPAN PERUBAHAN
-                </button>
-                <button onclick="logout()" class="mt-4 w-full text-red-500 font-bold py-2">
-                    LOGOUT
-                </button>
-            <% } else { %>
-                <a href="/chat/<%= user.phone %>" class="mt-8 block text-center w-full bg-[#075E54] text-white font-bold py-3 rounded-lg">
-                    KIRIM PESAN
-                </a>
-            <% } %>
         </div>
     </div>
 
     <script>
-        let base64Image = "<%= user.photo %>";
-
-        function previewImage(event) {
-            const file = event.target.files[0];
-            const reader = new FileReader();
-            reader.onload = function() {
-                document.getElementById('profileImg').src = reader.result;
-                base64Image = reader.result;
-            }
-            reader.readAsDataURL(file);
+        let base64 = "<%= user.photo %>";
+        function preview(e) {
+            const f = e.target.files[0];
+            const r = new FileReader();
+            r.readAsDataURL(f);
+            r.onload = () => { document.getElementById('pImg').src = r.result; base64 = r.result; };
         }
 
-        async function updateProfile() {
-            const name = document.getElementById('name').value;
-            const bio = document.getElementById('bio').value;
-
-            const res = await fetch('/profile/update', {
+        async function saveProfile() {
+            const name = document.getElementById('pName').value;
+            const bio = document.getElementById('pBio').value;
+            await fetch('/profile/update', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ name, bio, photo: base64Image })
+                body: JSON.stringify({ name, bio, photo: base64 })
             });
+            alert("Profil berhasil diperbarui!");
+            location.reload();
+        }
 
-            const data = await res.json();
-            if(data.success) {
-                alert("Profil diperbarui!");
-                window.location.reload();
-            }
+        async function saveA2F() {
+            const pin = document.getElementById('newPin').value;
+            if(pin.length < 6) return alert("PIN harus 6 digit angka!");
+            await fetch('/profile/a2f', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ pin })
+            });
+            alert("Keamanan A2F Aktif! Gunakan PIN ini untuk masuk.");
+            location.reload();
         }
 
         function logout() {
