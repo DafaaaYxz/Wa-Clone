@@ -1,75 +1,84 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat - <%= targetUser.name %></title>
+    <title>VibeChat - <%= targetUser.name %></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .bg-vibe { background-color: #f8fafc; background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); }
-        .bubble-me { background-color: #10b981; color: white; border-radius: 15px 15px 0 15px; }
-        .bubble-them { background-color: white; color: #1e293b; border-radius: 15px 15px 15px 0; border: 1px solid #e2e8f0; }
+        .bg-vibe { background-color: #f1f5f9; background-image: url('https://www.transparenttextures.com/patterns/pinstriped-suit.png'); }
+        .bubble-me { background-color: #059669; color: white; border-radius: 20px 20px 4px 20px; }
+        .bubble-them { background-color: white; color: #1e293b; border-radius: 20px 20px 20px 4px; }
     </style>
 </head>
-<body class="flex flex-col h-screen bg-vibe font-sans">
-    <!-- Header -->
-    <div class="bg-slate-800 p-4 flex items-center text-white shadow-lg z-10">
-        <a href="/home" class="mr-4 text-xl font-bold text-emerald-400">←</a>
-        <a href="/profile/<%= targetUser.phone %>" class="flex items-center">
+<body class="flex flex-col h-screen bg-vibe">
+    <!-- Navbar -->
+    <div class="bg-slate-900 p-4 flex items-center text-white shadow-xl z-10 border-b border-emerald-900/30">
+        <a href="/home" class="mr-4 text-emerald-400 font-black">←</a>
+        <a href="/profile/<%= targetUser.phone %>" class="flex items-center flex-1">
             <img src="<%= targetUser.photo %>" class="w-10 h-10 rounded-full mr-3 border-2 border-emerald-500 object-cover">
             <div>
-                <h2 class="font-bold text-sm leading-none"><%= targetUser.name %></h2>
-                <small class="<%= status === 'online' ? 'text-emerald-400' : 'text-slate-400' %> text-[10px] font-bold uppercase tracking-widest">
-                    ● <%= status %>
-                </small>
+                <h2 class="font-bold text-sm truncate w-40"><%= targetUser.name %></h2>
+                <div class="flex items-center gap-1">
+                    <span class="w-2 h-2 rounded-full <%= status === 'online' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-500' %>"></span>
+                    <span class="text-[9px] uppercase tracking-tighter text-slate-300 font-bold"><%= status %></span>
+                </div>
             </div>
         </a>
     </div>
 
-    <!-- Messages Area -->
+    <!-- Chat Box -->
     <div id="chatBox" class="flex-1 overflow-y-auto p-4 flex flex-col-reverse space-y-reverse space-y-4">
         <% messages.forEach(msg => { 
             let isMe = (msg.sender === myPhone);
         %>
             <div class="flex <%= isMe ? 'justify-end' : 'justify-start' %>">
-                <div class="<%= isMe ? 'bubble-me' : 'bubble-them' %> p-3 max-w-[85%] shadow-sm relative group">
+                <div class="<%= isMe ? 'bubble-me shadow-emerald-900/20' : 'bubble-them shadow-slate-200' %> p-3 max-w-[85%] shadow-md relative group min-w-[80px]">
                     <% if(msg.photo) { %>
-                        <img src="<%= msg.photo %>" class="rounded-lg mb-2 max-w-full border border-black/5">
+                        <img src="<%= msg.photo %>" class="rounded-xl mb-2 max-w-full">
                     <% } %>
-                    <p class="text-sm md:text-base pr-8 break-words leading-relaxed">
-                        <%= msg.text %>
-                    </p>
-                    <span class="text-[9px] <%= isMe ? 'text-emerald-100' : 'text-slate-400' %> absolute bottom-1 right-2 font-mono">
-                        <%= msg.time %>
-                    </span>
+                    <p class="text-sm pb-2"><%= msg.text %></p>
+                    
+                    <div class="absolute bottom-1 right-2 flex items-center gap-1">
+                        <span class="text-[8px] opacity-60 font-mono"><%= msg.time %></span>
+                        <% if(isMe) { %>
+                            <% if(msg.status === 'read') { %>
+                                <span class="text-sky-300 text-[10px] font-black">✓✓</span>
+                            <% } else if(msg.status === 'delivered') { %>
+                                <span class="text-slate-300 text-[10px] font-black">✓✓</span>
+                            <% } else { %>
+                                <span class="text-slate-300 text-[10px] font-black">✓</span>
+                            <% } %>
+                        <% } %>
+                    </div>
                 </div>
             </div>
         <% }) %>
     </div>
 
-    <!-- Input Area -->
-    <div class="bg-white p-4 border-t border-slate-200 flex items-center gap-3">
-        <label class="cursor-pointer hover:bg-slate-100 p-2 rounded-full transition">
-            <span class="text-xl">📷</span> 
+    <!-- Message Input -->
+    <div class="bg-white p-4 flex items-center gap-3 border-t shadow-2xl">
+        <label class="cursor-pointer p-2 hover:bg-slate-100 rounded-full transition">
+            <span class="text-xl">📷</span>
             <input type="file" id="fileInp" class="hidden" accept="image/*">
         </label>
-        <input type="text" id="msgInp" placeholder="Tulis pesan..." class="flex-1 p-3 rounded-2xl bg-slate-100 border-none focus:ring-2 focus:ring-emerald-500 text-sm">
-        <button onclick="send()" id="btnSend" class="bg-emerald-600 text-white p-3 rounded-2xl w-12 h-12 flex items-center justify-center shadow-lg hover:bg-emerald-700 active:scale-90 transition">
-            <span class="text-xl">➤</span>
+        <input type="text" id="msgInp" placeholder="Ketik pesan di sini..." class="flex-1 p-3 bg-slate-100 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 text-sm">
+        <button onclick="send()" class="bg-emerald-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg hover:bg-emerald-700 active:scale-90 transition">
+            <span class="text-xl font-bold">➤</span>
         </button>
     </div>
 
     <script>
         async function send() {
-            const btn = document.getElementById('btnSend');
-            const text = document.getElementById('msgInp').value;
-            const file = document.getElementById('fileInp').files[0];
+            const msgInp = document.getElementById('msgInp');
+            const fileInp = document.getElementById('fileInp');
+            const text = msgInp.value;
+            const file = fileInp.files[0];
             let photoData = null;
 
             if(!text && !file) return;
-            btn.disabled = true;
 
-            const processSend = async (photo) => {
+            const doPost = async (photo) => {
                 await fetch('/send-message', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -83,15 +92,13 @@
             };
 
             if(file) {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => processSend(reader.result);
+                const r = new FileReader();
+                r.readAsDataURL(file);
+                r.onload = () => doPost(r.result);
             } else {
-                await processSend(null);
+                await doPost(null);
             }
         }
-
-        // Auto Refresh pesan baru tiap 8 detik
         setInterval(() => { location.reload(); }, 8000);
     </script>
 </body>
