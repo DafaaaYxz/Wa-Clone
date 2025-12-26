@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil - <%= user.name %></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="max-w-md mx-auto bg-white min-h-screen shadow-lg">
+        <!-- Header -->
+        <div class="bg-[#075E54] p-4 text-white flex items-center gap-4">
+            <a href="/home" class="text-xl">←</a>
+            <h1 class="text-lg font-bold">Profil</h1>
+        </div>
+
+        <div class="p-6 text-center">
+            <div class="relative inline-block">
+                <img id="profileImg" src="<%= user.photo %>" class="w-32 h-32 rounded-full object-cover border-4 border-gray-200">
+                <% if (isMe) { %>
+                    <label for="fileInput" class="absolute bottom-0 right-0 bg-[#25D366] p-2 rounded-full cursor-pointer shadow-lg">
+                        📷
+                        <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="previewImage(event)">
+                    </label>
+                <% } %>
+            </div>
+
+            <div class="mt-6 text-left space-y-4">
+                <div>
+                    <label class="text-xs text-gray-500">Nama</label>
+                    <input type="text" id="name" value="<%= user.name %>" 
+                        class="w-full border-b p-2 focus:outline-none focus:border-[#075E54]" 
+                        <%= isMe ? '' : 'disabled' %>>
+                </div>
+
+                <div>
+                    <label class="text-xs text-gray-500">Info / Bio</label>
+                    <input type="text" id="bio" value="<%= user.bio %>" 
+                        class="w-full border-b p-2 focus:outline-none focus:border-[#075E54]" 
+                        <%= isMe ? '' : 'disabled' %>>
+                </div>
+
+                <div>
+                    <label class="text-xs text-gray-500">Nomor Telepon</label>
+                    <p class="p-2 text-gray-800 font-mono"><%= user.phone %></p>
+                </div>
+            </div>
+
+            <% if (isMe) { %>
+                <button onclick="updateProfile()" class="mt-8 w-full bg-[#25D366] text-white font-bold py-3 rounded-lg shadow-md hover:bg-[#1ebd5e]">
+                    SIMPAN PERUBAHAN
+                </button>
+                <button onclick="logout()" class="mt-4 w-full text-red-500 font-bold py-2">
+                    LOGOUT
+                </button>
+            <% } else { %>
+                <a href="/chat/<%= user.phone %>" class="mt-8 block text-center w-full bg-[#075E54] text-white font-bold py-3 rounded-lg">
+                    KIRIM PESAN
+                </a>
+            <% } %>
+        </div>
+    </div>
+
+    <script>
+        let base64Image = "<%= user.photo %>";
+
+        function previewImage(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function() {
+                document.getElementById('profileImg').src = reader.result;
+                base64Image = reader.result;
+            }
+            reader.readAsDataURL(file);
+        }
+
+        async function updateProfile() {
+            const name = document.getElementById('name').value;
+            const bio = document.getElementById('bio').value;
+
+            const res = await fetch('/profile/update', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ name, bio, photo: base64Image })
+            });
+
+            const data = await res.json();
+            if(data.success) {
+                alert("Profil diperbarui!");
+                window.location.reload();
+            }
+        }
+
+        function logout() {
+            document.cookie = "userPhone=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            window.location.href = "/";
+        }
+    </script>
+</body>
+</html>
