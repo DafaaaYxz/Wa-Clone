@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp - Beranda</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="max-w-md mx-auto bg-white min-h-screen shadow-lg flex flex-col">
+        <!-- Header -->
+        <div class="bg-[#075E54] p-4 text-white flex justify-between items-center sticky top-0">
+            <h1 class="text-xl font-bold">WhatsApp</h1>
+            <div class="flex gap-4">
+                <a href="/contacts" class="hover:text-gray-200">🔍</a>
+                <a href="/profile/<%= me.phone %>" class="hover:text-gray-200">⚙️</a>
+            </div>
+        </div>
+
+        <!-- Chat List -->
+        <div class="flex-1 overflow-y-auto">
+            <% if (chatList.length === 0) { %>
+                <div class="p-10 text-center text-gray-500">
+                    <p>Belum ada riwayat chat.</p>
+                    <a href="/contacts" class="text-[#075E54] font-bold">Cari Kontak</a>
+                </div>
+            <% } else { %>
+                <% chatList.forEach(chat => { %>
+                    <a href="/chat/<%= chat.phone %>" class="flex items-center p-4 border-b hover:bg-gray-50">
+                        <img src="<%= chat.photo %>" class="w-12 h-12 rounded-full object-cover mr-4">
+                        <div class="flex-1">
+                            <div class="flex justify-between">
+                                <h2 class="font-bold text-gray-800"><%= chat.name %></h2>
+                                <span class="text-xs text-gray-400"><%= chat.phone %></span>
+                            </div>
+                            <p class="text-sm text-gray-500 truncate"><%= chat.bio %></p>
+                        </div>
+                    </a>
+                <% }) %>
+            <% } %>
+        </div>
+
+        <!-- Floating Action Button -->
+        <a href="/contacts" class="fixed bottom-6 right-6 bg-[#25D366] text-white p-4 rounded-full shadow-xl hover:scale-110 transition">
+            💬
+        </a>
+    </div>
+</body>
+</html>
